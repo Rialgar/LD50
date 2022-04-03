@@ -3,6 +3,31 @@
 <head>
     <script async src="./lib/phaser.js"></script>
     <script async src="./main.js"></script>
+    <style>
+        body, html {
+            padding: 0;
+            margin: 0;
+        }
+        table.debug {
+            border-spacing: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        table.debug td {
+            padding: 0;
+            width: calc(var(--debug-scale) * 1px);
+            height: calc(var(--debug-scale) * 1px);
+            background-color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            vertical-align: middle;
+            opacity: 0;
+            user-select: none;
+        }
+        table.debug td:hover{
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>    
 </body>

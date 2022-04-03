@@ -1,9 +1,26 @@
+
+const terrainConfig = {
+    width: 32,
+    height: 24,
+    scale: 32,
+    colors: [
+        0x220500,
+        0x551000,
+        0x993300,
+        0x555500,
+        0x005500,
+        0x007700,
+        0x00AA00,
+        0x88DD00,
+    ]
+}
+
 function onLoad(){
 
     var config = {
         type: Phaser.AUTO,
-        width: 800,
-        height: 600,
+        width: terrainConfig.width * terrainConfig.scale,
+        height: terrainConfig.height * terrainConfig.scale,
         scene: {
             preload: preload,
             create: create,
@@ -11,22 +28,7 @@ function onLoad(){
         }
     };
 
-    const game = new Phaser.Game(config);
-    const terrainConfig = {
-        width: 32,
-        height: 24,
-        scale: 25,
-        colors: [
-            0x220500,
-            0x551000,
-            0x993300,
-            0x995500,
-            0x555500,
-            0x005500,
-            0x007700,
-            0x00AA00
-        ]
-    }
+    const game = new Phaser.Game(config);    
     const terrain = [
         [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
         [5, 0, 0, 0, 0, 5, 4, 3, 2, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5],
@@ -65,27 +67,40 @@ function onLoad(){
         {x:15, y:0, speed: 10}
     ]
 
+    document.body.style.setProperty("--debug-scale", terrainConfig.scale);
+    const debugTable = document.createElement("table");
+    debugTable.className="debug";
 
+    document.body.appendChild(debugTable)
+    const debugElements = [];
     const water = [];
     for(let x = 0; x < terrainConfig.width; x++){
         water[x] = [];
+        debugElements[x] = []        
         for(let y = 0; y < terrainConfig.height; y++){
             water[x][y] = 0;
-            terrain[x][y] = Math.floor(Math.random()*terrainConfig.colors.length);
+            //terrain[x][y] = Math.floor(Math.random()*terrainConfig.colors.length);
         }
     }    
+
+    for(let y = 0; y < terrainConfig.height; y++){
+        const debugRow = document.createElement("tr");
+        debugTable.appendChild(debugRow);
+        for(let x = 0; x < terrainConfig.width; x++){
+            debugElements[x][y] = document.createElement('td');
+            debugElements[x][y].textContent = '0';            
+            debugRow.appendChild(debugElements[x][y]);
+        }
+    }
+
     let terrainDirty = true;
     let terrainGraphics = [];
     let waterGraphics = [];
 
-    function preload ()
-    {
-        console.log("preload");
-    }
+    function preload (){}
 
     function create ()
     {
-        console.log("create");
         for(let i = 0; i < terrainConfig.colors.length; i++){
             terrainGraphics.push(this.add.graphics());
             waterGraphics.push(this.add.graphics());
@@ -142,49 +157,57 @@ function onLoad(){
         return (c.r<<16) + (c.g<<8) + c.b;
     }
 
+    function getWaterAlpha(w){
+        if(w > 0){
+            return Math.min(w/2+0.5, 1);
+        }
+        return 0;
+    };
+
     function fillRectIfPositive(graphics, color, alpha, l, r, t, b){
         if(l<r && t<b && alpha > 0){
             graphics.fillStyle(color, alpha);
             graphics.fillRect(l, t, r-l, b-t);
         }
     }
-
-    const stepSize = 2;
+    
     function drawTile(graphics, x, y, getColor, getAlpha = () => 1){
         const scale = terrainConfig.scale;
-        let ml = 0, mr = 0, mt = 0, mb = 0;
+        const stepSize = scale/16;        
 
         const hc = terrain[x][y];
-        const hl = getHeightOr0(x-1, y)-1;
-        const hr = getHeightOr0(x+1, y)-1;
-        const ht = getHeightOr0(x, y-1)-1;
-        const hb = getHeightOr0(x, y+1)-1;
+        const hl = getHeightOr0(x-1, y);
+        const hr = getHeightOr0(x+1, y);
+        const ht = getHeightOr0(x, y-1);
+        const hb = getHeightOr0(x, y+1);
         const top = Math.max(hc, hl, hr, ht, hb);
         
-        for(let h = top; h > hc; h--){
+        let ml = 0, mr = 0, mt = 0, mb = 0;
+
+        for(let h = top-1; h > hc; h--){
             graphics[h].fillStyle(getColor(h), getAlpha(h));
-            if(hl >= h){
+            if(hl > h){
                 graphics[h].fillRect(x*scale+ml, y*scale+mt, stepSize, scale-(mt+mb));
             }
-            if(hr >= h){
+            if(hr > h){
                 graphics[h].fillRect((x+1)*scale-mr, y*scale+mt, -stepSize, scale-(mt+mb));
             }
-            if(ht >= h){
+            if(ht > h){
                 graphics[h].fillRect(x*scale+ml, y*scale+mt, scale-(ml+mr), stepSize);
             }
-            if(hb >= h){
+            if(hb > h){
                 graphics[h].fillRect(x*scale+ml, (y+1)*scale-mb, scale-(ml+mr), -stepSize);
             }
-            if(hl >= h){
+            if(hl > h){
                 ml += stepSize;
             }
-            if(hr >= h){
+            if(hr > h){
                 mr += stepSize;
             }
-            if(ht >= h){
+            if(ht > h){
                 mt += stepSize;
             }
-            if(hb >= h){
+            if(hb > h){
                 mb += stepSize;
             }
         }
@@ -242,7 +265,7 @@ function onLoad(){
         }
         for(let x = 0; x < terrainConfig.width; x++){
             for(let y = 0; y < terrainConfig.height; y++){
-                water[x][y] += changes[x][y];
+                water[x][y] += changes[x][y];                
             }
         }
         for(let i = 0; i < terrainConfig.colors.length; i++){
@@ -251,15 +274,10 @@ function onLoad(){
         for(let x = 0; x < terrainConfig.width; x++){
             for(let y = 0; y < terrainConfig.height; y++){
                 const w = Math.ceil(water[x][y]*5)/5;
+                debugElements[x][y].textContent = w;
                 if(w > 0){
                     const hc = terrain[x][y];
-                    drawTile(waterGraphics, x, y, h => getWaterColor(w+hc-h), h => {
-                        const wStep = w+hc-h;
-                        if(wStep > 0){
-                            return Math.min(wStep/2+0.5, 1);
-                        }
-                        return 0;
-                    });
+                    drawTile(waterGraphics, x, y, h => getWaterColor(w+hc-h), h => getWaterAlpha(w+hc-h));
                 }
             }
         }
