@@ -32,9 +32,31 @@ function onLoad(){
 
     const game = new Phaser.Game(config);
 
+    window.addEventListener('resize', resize);
+
     document.body.style.setProperty("--debug-scale", terrainConfig.scale);
     const debugTable = document.createElement("table");
     debugTable.className="debug";
+
+    const bagElement = document.createElement('div');
+    bagElement.className = 'bag';
+    bagElement.style.width = terrainConfig.scale + 'px';
+    bagElement.style.height = config.height + 'px';
+    const bagContentElement = document.createElement('div');
+    bagElement.appendChild(bagContentElement);
+    document.body.appendChild(bagElement);
+
+    function resize(){
+        const left = Math.round((document.documentElement.clientWidth-config.width-terrainConfig.scale)/2);
+        const top = Math.round((document.documentElement.clientHeight-config.height)/2);
+        game.canvas.style.left = left + 'px';
+        game.canvas.style.top = top + 'px';
+        debugTable.style.left = left + 'px';
+        debugTable.style.top = top + 'px';
+        bagElement.style.left = (left + config.width) + 'px';
+        bagElement.style.top = top + 'px';
+    }
+    resize();
 
     document.body.appendChild(debugTable)
     const debugElements = [];
@@ -124,6 +146,8 @@ function onLoad(){
         BeaconParticle.target = null;
     }
     
+    let bagLevel = 0;
+    const maxBagLevel = 5;
     function create ()
     {
         game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
@@ -139,12 +163,15 @@ function onLoad(){
             const y = Math.floor(pointer.worldY / terrainConfig.scale);
             console.log(x, y);
             if(!isBeacon(x, y)){
-                if(pointer.button === 0){
+                if(pointer.button === 0 && bagLevel < maxBagLevel){
                     terrain[x][y] = Math.max(terrain[x][y]-1, 0);
-                } else if (pointer.button === 2){
+                    bagLevel += 1;
+                } else if (pointer.button === 2  && bagLevel > 0){
                     terrain[x][y] = Math.min(terrain[x][y]+1, terrainConfig.colors.length-1);
+                    bagLevel -= 1;
                 }
-                terrainDirty = true;                
+                terrainDirty = true;
+                bagContentElement.style.height = (bagLevel/maxBagLevel)*100 + '%';
             }            
             lastX = x;
             lastY = y;
@@ -154,13 +181,16 @@ function onLoad(){
                 const x = Math.floor(pointer.worldX / terrainConfig.scale);
                 const y = Math.floor(pointer.worldY / terrainConfig.scale);
                 if(lastX !== x || lastY !== y){
-                    if(!isBeacon(x,y)){
-                        if(pointer.leftButtonDown()){
+                    if(!isBeacon(x, y)){
+                        if(pointer.leftButtonDown() && bagLevel < maxBagLevel){
                             terrain[x][y] = Math.max(terrain[x][y]-1, 0);
-                        } else if (pointer.rightButtonDown()){
+                            bagLevel += 1;
+                        } else if (pointer.rightButtonDown() && bagLevel > 0){
                             terrain[x][y] = Math.min(terrain[x][y]+1, terrainConfig.colors.length-1);
+                            bagLevel -= 1;
                         }
                         terrainDirty = true;
+                        bagContentElement.style.height = (bagLevel/maxBagLevel)*100 + '%';
                     }                    
                     lastX = x;
                     lastY = y;
