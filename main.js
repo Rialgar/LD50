@@ -190,11 +190,17 @@ function onLoad(){
             lastY = y;
         }, this);
         this.input.on('pointermove', function (pointer) {
+            const x = Math.floor(pointer.worldX / terrainConfig.scale);
+            const y = Math.floor(pointer.worldY / terrainConfig.scale);
+            const validTile = !isBeacon(x, y) && !isCity(x, y);
+            if(validTile){
+                game.canvas.style.cursor = "pointer";
+            } else {
+                game.canvas.style.cursor = "default";
+            }
             if(pointer.isDown){
-                const x = Math.floor(pointer.worldX / terrainConfig.scale);
-                const y = Math.floor(pointer.worldY / terrainConfig.scale);
                 if(lastX !== x || lastY !== y){
-                    if(!isBeacon(x, y) && !isCity(x, y)){
+                    if(validTile){
                         if(pointer.leftButtonDown() && bagLevel < maxBagLevel && terrain[x][y] > 0){
                             terrain[x][y] = terrain[x][y]-1;
                             bagLevel += 1;
@@ -204,7 +210,7 @@ function onLoad(){
                         }
                         terrainDirty = true;
                         bagContentElement.style.height = (bagLevel/maxBagLevel)*100 + '%';
-                    }                    
+                    }
                     lastX = x;
                     lastY = y;
                 }
