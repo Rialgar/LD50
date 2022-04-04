@@ -1,4 +1,3 @@
-
 const terrainConfig = {
     width: 32,
     height: 24,
@@ -15,6 +14,9 @@ const terrainConfig = {
     ]
 }
 
+import levels from './levels.js';
+import BeaconParticle from './BeaconParticle.js';
+
 function onLoad(){
 
     var config = {
@@ -29,75 +31,6 @@ function onLoad(){
     };
 
     const game = new Phaser.Game(config);
-    const terrain = [
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
-        [0,0,0,0,1,1,1,0,0,0,1,1,1,1,0,0,1,1,1,0,0,0,0,0],
-        [0,0,0,1,2,2,1,0,0,1,2,2,3,2,1,1,3,2,2,1,1,0,0,0],
-        [0,0,1,2,3,2,4,2,4,3,4,4,4,3,2,3,4,3,2,2,1,1,0,0],
-        [0,1,2,3,4,4,5,3,4,4,4,2,2,3,4,3,3,4,2,2,1,0,0,0],
-        [0,1,2,3,4,4,4,3,4,4,3,4,3,2,2,4,4,4,3,2,1,0,0,0],
-        [0,1,2,2,4,5,5,5,4,4,3,3,3,5,4,3,4,4,4,3,2,1,0,0],
-        [0,0,1,2,3,3,5,5,3,4,5,5,5,5,3,5,3,4,4,3,2,1,0,0],
-        [0,0,0,1,3,3,5,4,6,5,3,5,5,6,5,5,4,4,4,3,2,0,0,0],
-        [0,0,0,1,3,5,5,4,6,6,3,5,6,7,6,5,4,4,4,3,2,1,0,0],
-        [0,0,0,1,3,5,6,5,6,7,7,7,7,7,7,6,4,4,4,3,2,1,0,0],
-        [0,0,1,1,3,5,4,6,7,7,7,7,7,7,7,5,4,4,4,3,2,1,0,0],
-        [0,1,2,2,4,4,6,7,7,7,7,7,7,7,7,4,5,3,3,3,1,0,0,0],
-        [0,1,2,3,4,5,7,7,7,7,7,7,7,7,7,5,5,3,2,1,0,0,0,0],
-        [0,1,2,4,4,5,7,7,7,7,7,7,7,7,7,4,4,3,2,1,0,0,0,0],
-        [0,1,2,3,5,6,7,7,7,7,7,7,7,7,7,4,4,3,2,1,0,0,0,0],
-        [0,0,2,5,5,6,7,7,7,7,7,7,7,7,7,5,6,3,3,1,0,0,0,0],
-        [0,0,2,2,6,6,7,7,7,7,7,7,7,7,7,6,6,4,4,3,1,0,0,0],
-        [0,0,0,5,4,6,7,7,7,7,7,7,7,7,7,6,4,5,5,3,3,1,0,0],
-        [0,0,2,2,5,6,6,6,7,7,7,7,7,7,6,5,5,5,5,5,3,1,0,0],
-        [0,1,2,3,5,5,6,6,6,7,7,7,7,6,5,6,5,4,5,3,3,1,0,0],
-        [0,1,3,4,4,5,5,5,6,6,6,7,4,6,5,5,5,4,4,4,2,1,0,0],
-        [0,1,3,4,4,4,5,5,5,5,4,5,5,5,5,5,4,4,4,4,2,1,0,0],
-        [0,0,2,3,3,3,4,5,5,5,5,4,4,5,4,4,4,5,5,4,2,2,0,0],
-        [0,0,1,2,3,4,5,4,5,5,5,5,5,4,4,5,4,5,4,4,4,1,1,0],
-        [0,0,1,3,4,5,5,4,4,5,4,5,5,4,5,5,5,4,5,5,4,2,1,0],
-        [0,0,1,2,3,5,5,5,5,4,4,4,5,4,4,4,5,5,4,4,2,2,1,0],
-        [0,1,2,2,4,5,5,5,4,5,3,4,4,4,5,5,4,4,4,4,4,2,1,0],
-        [0,1,2,3,3,4,4,4,3,4,2,4,3,3,5,4,2,2,4,2,4,0,1,0],
-        [0,0,1,1,2,3,3,3,2,2,1,3,2,2,3,2,2,2,3,1,4,2,1,0],
-        [0,0,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,0,1,1,0],
-        [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
-    ];
-    const sources = [
-        {x:0, y:0, speed: 1},
-        {x:0, y:5, speed: 1},
-        {x:5, y:0, speed: 1},
-        {x:0, y:10, speed: 1},
-        {x:10, y:0, speed: 1},
-
-        {x:15, y:0, speed: 1},
-
-        {x:31, y:0, speed: 1},
-        {x:31, y:5, speed: 1},
-        {x:26, y:0, speed: 1},
-        {x:31, y:10, speed: 1},
-        {x:21, y:0, speed: 1},
-
-        {x:0, y:23, speed: 1},
-        {x:0, y:18, speed: 1},
-        {x:5, y:23, speed: 1},
-        {x:0, y:13, speed: 1},
-        {x:10, y:23, speed: 1},
-
-        {x:15, y:23, speed: 1},
-
-        {x:31, y:23, speed: 1},
-        {x:31, y:18, speed: 1},
-        {x:26, y:23, speed: 1},
-        {x:31, y:13, speed: 1},
-        {x:21, y:23, speed: 1}
-    ];
-    const beaconLocations = [
-        {x:27, y:6},
-        {x:10, y:17},
-        {x:22, y:15},
-        {x:7, y:7}
-    ];
 
     document.body.style.setProperty("--debug-scale", terrainConfig.scale);
     const debugTable = document.createElement("table");
@@ -105,12 +38,15 @@ function onLoad(){
 
     document.body.appendChild(debugTable)
     const debugElements = [];
+    const terrain = [];
     const water = [];
     for(let x = 0; x < terrainConfig.width; x++){
-        water[x] = [];
         debugElements[x] = []
+        water[x] = [];
+        terrain[x] = []
         for(let y = 0; y < terrainConfig.height; y++){
             water[x][y] = 0;
+            terrain[x][y] = 0;
         }
     }
 
@@ -125,13 +61,18 @@ function onLoad(){
     }
 
     let terrainDirty = true;
-    let terrainGraphics = [];
-    let waterGraphics = [];
-    let beacons = [];
+    const terrainGraphics = [];
+    const waterGraphics = [];
+    const beacons = [];
+    const sources = [];
+    let beaconParticles;
+    let city;
 
     function preload (){
         this.load.image('beacon', 'assets/Beacon.png');
         this.load.image('beacon_active', 'assets/Beacon_active.png');
+        this.load.image('beacon_particles', 'assets/particles/Beacon_Particle.png');
+        this.load.image('city', 'assets/City.png');
     }
 
     function isBeacon(x, y){
@@ -144,6 +85,45 @@ function onLoad(){
         })
     }
 
+    let nextLevel = 0;
+    function loadLevel(game){
+        const level = levels[nextLevel];
+        terrainDirty = true;
+        for(let x = 0; x < terrainConfig.width; x++){
+            for(let y = 0; y < terrainConfig.height; y++){
+                water[x][y] = 0;
+                terrain[x][y] = level.terrain[x][y];
+            }
+        }
+        nextLevel++;
+
+        sources.length=0;
+        sources.push(...level.sources);
+
+        beacons.forEach(beacon => {
+            beacon.destroy();
+        });        
+        beacons.length = 0;
+        level.beaconLocations.forEach(location => {
+            beacons.push(
+                game.add
+                    .image(location.x*terrainConfig.scale, location.y*terrainConfig.scale, "beacon")
+                    .setDepth(3*terrainConfig.colors.length)
+                    .setData("pos", location)
+                    .setData("charge", 0)
+            );
+        });
+
+        city && city.destroy();
+        city = game.add
+            .image(level.city.x*terrainConfig.scale, level.city.y*terrainConfig.scale, 'city')
+            .setDepth(terrainConfig.colors.length*3);
+
+        beaconParticles && beaconParticles.destroy();
+        beaconParticles = game.add.particles('beacon_particles').setDepth(terrainConfig.colors.length*3+1);
+        BeaconParticle.target = null;
+    }
+    
     function create ()
     {
         game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
@@ -151,17 +131,7 @@ function onLoad(){
         for(let i = 0; i < terrainConfig.colors.length; i++){
             terrainGraphics.push(this.add.graphics().setDepth(3*i));
             waterGraphics.push(this.add.graphics().setDepth(3*i+2));
-        }
-
-        beaconLocations.forEach(location => {
-            beacons.push(
-                this.add
-                .image(location.x*terrainConfig.scale, location.y*terrainConfig.scale, "beacon")
-                .setDepth(3*terrainConfig.colors.length)
-                .setData("pos", location)
-                .setData("charge", 0)
-            );
-        });
+        }        
 
         let lastX=0, lastY = 0;
         this.input.on('pointerdown', function (pointer) {
@@ -196,7 +166,10 @@ function onLoad(){
                     lastY = y;
                 }
             }            
-        });
+        });        
+
+        loadLevel(this);
+
         window.debug = {
             terrainGraphics, waterGraphics, beacons
         }
@@ -344,6 +317,7 @@ function onLoad(){
         }
     }
 
+    let levelLoadTimeout = 0;
     function update (time, delta)
     {
         sources.forEach(source => {
@@ -378,16 +352,6 @@ function onLoad(){
             }
         }
 
-        beacons.forEach(beacon => {
-            const {x, y} = beacon.getData('pos');
-            const w = water[x][y] + water[x][y-1] + water[x-1][y] + water[x-1][y-1];
-            beacon.setData('charge', Math.min(beacon.getData('charge')+w/4, 1000));
-            if(beacon.getData('charge') === 1000){
-                beacon.setTexture("beacon_active");
-            }
-            beacon.angle += beacon.getData('charge') * delta/1000;
-        });
-
         if(terrainDirty){
             for(let i = 0; i < terrainConfig.colors.length; i++){
                 terrainGraphics[i].clear();
@@ -399,6 +363,45 @@ function onLoad(){
             }
             terrainDirty = false;
         }
+
+        if(levelLoadTimeout > 0){
+            levelLoadTimeout -= delta;
+            if(levelLoadTimeout <= 0){
+                loadLevel(this);
+                return;
+            }
+
+        }
+        
+        let finished = true;
+        beacons.forEach(beacon => {
+            let charge = beacon.getData('charge');
+            if(charge < 1000){
+                const {x, y} = beacon.getData('pos');
+                const w = water[x][y] + water[x][y-1] + water[x-1][y] + water[x-1][y-1];
+                charge = Math.min(charge + w/4, 1000);
+                beacon.setData('charge', charge);
+                if(charge === 1000){
+                    beacon.setTexture("beacon_active");                    
+
+                    const emitter = beaconParticles.createEmitter({
+                        speed: 100,
+                        scale: { start: 1, end: 0 },
+                        blendMode: 'ADD',
+                        follow: beacon,
+                        particleClass: BeaconParticle
+                    });
+                } else {
+                    finished = false;
+                }
+            }
+            beacon.angle += beacon.getData('charge') * delta/1000;
+        });                
+
+        if(finished && levelLoadTimeout <= 0){            
+            BeaconParticle.target = {x:city.x, y:city.y};
+            levelLoadTimeout = 5000;
+        }        
     }
 }
 
