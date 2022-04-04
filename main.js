@@ -46,6 +46,16 @@ function onLoad(){
     bagElement.appendChild(bagContentElement);
     document.body.appendChild(bagElement);
 
+    const uiElement = document.getElementById('ui');
+    document.body.removeChild(uiElement);
+    document.body.appendChild(uiElement);
+    const levelIntroElement = document.getElementById('intro');
+    const okButton = document.getElementById('ok');
+    okButton.addEventListener('click', () => {
+        uiElement.classList.add('hidden');
+        paused = false;
+    });
+
     function resize(){
         const left = Math.round((document.documentElement.clientWidth-config.width-terrainConfig.scale)/2);
         const top = Math.round((document.documentElement.clientHeight-config.height)/2);
@@ -94,7 +104,7 @@ function onLoad(){
         this.load.image('beacon', 'assets/Beacon.png');
         this.load.image('beacon_active', 'assets/Beacon_active.png');
         this.load.image('beacon_particles', 'assets/particles/Beacon_Particle.png');
-        this.load.image('city', 'assets/City.png');
+        this.load.spritesheet('city', 'assets/City.png', {frameWidth: 96, frameHeight: 96});
     }
 
     function isBeacon(x, y){
@@ -118,27 +128,34 @@ function onLoad(){
     const maxBagLevel = 5;
 
     let nextLevel = 0;
-    function loadLevel(game){
-        const level = levels[nextLevel];
+    let levelFinished = false;
+    let paused = false;
+    function loadLevel(scene, lost){
+        let level;
+        if(lost){
+            level = levels[nextLevel-1];
+        } else {
+            level = levels[nextLevel];
+            nextLevel++;
+        }
         terrainDirty = true;
         for(let x = 0; x < terrainConfig.width; x++){
             for(let y = 0; y < terrainConfig.height; y++){
                 water[x][y] = 0;
                 terrain[x][y] = level.terrain[x][y];
             }
-        }
-        nextLevel++;
+        }        
 
         sources.length=0;
         sources.push(...level.sources);
 
         beacons.forEach(beacon => {
             beacon.destroy();
-        });        
+        });
         beacons.length = 0;
         level.beaconLocations.forEach(location => {
             beacons.push(
-                game.add
+                scene.add
                     .image(location.x*terrainConfig.scale, location.y*terrainConfig.scale, "beacon")
                     .setDepth(3*terrainConfig.colors.length)
                     .setData("pos", location)
@@ -147,20 +164,39 @@ function onLoad(){
         });
 
         city && city.destroy();
-        city = game.add
-            .image((level.city.x+0.5)*terrainConfig.scale, (level.city.y+0.5)*terrainConfig.scale, 'city')
+        city = scene.add
+            .image((level.city.x+0.5)*terrainConfig.scale, (level.city.y+0.5)*terrainConfig.scale, 'city', 0)
             .setDepth(terrainConfig.colors.length*3)
             .setData("pos", level.city)
             .setData("charge", 0);
 
         beaconParticles && beaconParticles.destroy();
-        beaconParticles = game.add.particles('beacon_particles').setDepth(terrainConfig.colors.length*3+1);
+        beaconParticles = scene.add.particles('beacon_particles').setDepth(terrainConfig.colors.length*3+1);
         BeaconParticle.target = null;
 
         bagLevel = 0;
         bagContentElement.style.height = (bagLevel/maxBagLevel)*100 + '%';
+
+        levelFinished = false;
+
+        levelIntroElement.innerHTML = "";
+        if(lost){
+            const p = document.createElement('p');
+            p.classList.add("lost");
+            p.textContent = "The microbes got to the colony core. You Lost. Restarting Level.";
+            levelIntroElement.appendChild(p);
+        }
+        level.intro.forEach( text => {
+            const p = document.createElement('p');
+            p.textContent = text;
+            levelIntroElement.appendChild(p);
+        });
+        
+        uiElement.classList.remove('hidden')
+
+        paused = true;
     }
-    
+
     function create ()
     {
         game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
@@ -168,7 +204,7 @@ function onLoad(){
         for(let i = 0; i < terrainConfig.colors.length; i++){
             terrainGraphics.push(this.add.graphics().setDepth(3*i));
             waterGraphics.push(this.add.graphics().setDepth(3*i+2));
-        }        
+        }
 
         let lastX=0, lastY = 0;
         this.input.on('pointerdown', function (pointer) {
@@ -185,7 +221,7 @@ function onLoad(){
                 }
                 terrainDirty = true;
                 bagContentElement.style.height = (bagLevel/maxBagLevel)*100 + '%';
-            }            
+            }
             lastX = x;
             lastY = y;
         }, this);
@@ -214,8 +250,8 @@ function onLoad(){
                     lastX = x;
                     lastY = y;
                 }
-            }            
-        });        
+            }
+        });
 
         loadLevel(this);
 
@@ -366,27 +402,89 @@ function onLoad(){
         }
     }
 
-    let levelLoadTimeout = 0;
+    let timeToLoad = 0;
     function update (time, delta)
     {
-        sources.forEach(source => {
-            water[source.x][source.y] += source.speed * delta/1000;
-        });
-        const changes = [];
-        for(let x = 0; x < terrainConfig.width; x++){
-            changes[x] = [];
-            for(let y = 0; y < terrainConfig.height; y++){
-                changes[x][y] = getChange(x, y, delta);
-            }
-        }
-        for(let x = 0; x < terrainConfig.width; x++){
-            for(let y = 0; y < terrainConfig.height; y++){
-                water[x][y] += changes[x][y];
-                if(water[x][y] < 0.001){
-                    water[x][y] = 0;
+        if(!paused){
+            sources.forEach(source => {
+                water[source.x][source.y] += source.speed * delta/1000;
+            });
+            const changes = [];
+            for(let x = 0; x < terrainConfig.width; x++){
+                changes[x] = [];
+                for(let y = 0; y < terrainConfig.height; y++){
+                    changes[x][y] = getChange(x, y, delta);
                 }
             }
+            for(let x = 0; x < terrainConfig.width; x++){
+                for(let y = 0; y < terrainConfig.height; y++){
+                    water[x][y] += changes[x][y];
+                    if(water[x][y] < 0.001){
+                        water[x][y] = 0;
+                    }
+                }
+            }
+
+            if(levelFinished){
+                if(city.active){
+                    let charge = city.getData('charge');
+                    charge += delta;
+                    city.setData('charge', charge);
+                    if(charge < 6000){
+                        city.setFrame(Math.floor(charge/1000), 5);
+                    } else if(BeaconParticle.target) {
+                        BeaconParticle.target = null;
+                        beaconParticles.emitters.each(emitter => emitter.stop());
+                        city.destroy();
+                        timeToLoad = time + 4000;
+                    }
+                } else if(time > timeToLoad){
+                    loadLevel(this);
+                    return;
+                }
+            }
+
+            if(city.active){
+                const {x,y} = city.getData('pos');
+                const w = water[x][y] + water[x][y-1]  + water[x][y+1] + water[x-1][y] + water[x-1][y-1]  + water[x-1][y+1] + water[x+1][y] + water[x+1][y-1]  + water[x+1][y+1];
+                if(w > 2){
+
+                    loadLevel(this, true);
+                    return;
+                }
+            }
+
+            let allBeaconsCharged = true;
+            beacons.forEach(beacon => {
+                let charge = beacon.getData('charge');
+                if(charge < 1000){
+                    const {x, y} = beacon.getData('pos');
+                    const w = water[x][y] + water[x][y-1] + water[x-1][y] + water[x-1][y-1];
+                    charge = Math.min(charge + w/4, 1000);
+                    beacon.setData('charge', charge);
+                    if(charge === 1000){
+                        beacon.setTexture("beacon_active");
+
+                        const emitter = beaconParticles.createEmitter({
+                            speed: 100,
+                            scale: { start: 1, end: 0 },
+                            blendMode: 'ADD',
+                            follow: beacon,
+                            particleClass: BeaconParticle
+                        });
+                    } else {
+                        allBeaconsCharged = false;
+                    }
+                }
+                beacon.angle += beacon.getData('charge') * delta/1000;
+            });
+
+            if(allBeaconsCharged && !levelFinished){
+                BeaconParticle.target = {x:city.x, y:city.y};
+                levelFinished = true;
+            }
         }
+
         for(let i = 0; i < terrainConfig.colors.length; i++){
             waterGraphics[i].clear();
         }
@@ -412,45 +510,6 @@ function onLoad(){
             }
             terrainDirty = false;
         }
-
-        if(levelLoadTimeout > 0){
-            levelLoadTimeout -= delta;
-            if(levelLoadTimeout <= 0){
-                loadLevel(this);
-                return;
-            }
-
-        }
-        
-        let finished = true;
-        beacons.forEach(beacon => {
-            let charge = beacon.getData('charge');
-            if(charge < 1000){
-                const {x, y} = beacon.getData('pos');
-                const w = water[x][y] + water[x][y-1] + water[x-1][y] + water[x-1][y-1];
-                charge = Math.min(charge + w/4, 1000);
-                beacon.setData('charge', charge);
-                if(charge === 1000){
-                    beacon.setTexture("beacon_active");                    
-
-                    const emitter = beaconParticles.createEmitter({
-                        speed: 100,
-                        scale: { start: 1, end: 0 },
-                        blendMode: 'ADD',
-                        follow: beacon,
-                        particleClass: BeaconParticle
-                    });
-                } else {
-                    finished = false;
-                }
-            }
-            beacon.angle += beacon.getData('charge') * delta/1000;
-        });                
-
-        if(finished && levelLoadTimeout <= 0){            
-            BeaconParticle.target = {x:city.x, y:city.y};
-            levelLoadTimeout = 5000;
-        }        
     }
 }
 

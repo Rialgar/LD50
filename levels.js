@@ -34,33 +34,33 @@ export default [{
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     ],
     sources: [
-        {x:0, y:0, speed: 1},
-        {x:0, y:5, speed: 1},
-        {x:5, y:0, speed: 1},
-        {x:0, y:10, speed: 1},
-        {x:10, y:0, speed: 1},
+        {x:0, y:0, speed: 2},
+        {x:0, y:5, speed: 2},
+        {x:5, y:0, speed: 2},
+        {x:0, y:10, speed: 2},
+        {x:10, y:0, speed: 2},
 
-        {x:15, y:0, speed: 1},
+        {x:15, y:0, speed: 2},
 
-        {x:31, y:0, speed: 1},
-        {x:31, y:5, speed: 1},
-        {x:26, y:0, speed: 1},
-        {x:31, y:10, speed: 1},
-        {x:21, y:0, speed: 1},
+        {x:31, y:0, speed: 2},
+        {x:31, y:5, speed: 2},
+        {x:26, y:0, speed: 2},
+        {x:31, y:10, speed: 2},
+        {x:21, y:0, speed: 2},
 
-        {x:0, y:23, speed: 1},
-        {x:0, y:18, speed: 1},
-        {x:5, y:23, speed: 1},
-        {x:0, y:13, speed: 1},
-        {x:10, y:23, speed: 1},
+        {x:0, y:23, speed: 2},
+        {x:0, y:18, speed: 2},
+        {x:5, y:23, speed: 2},
+        {x:0, y:13, speed: 2},
+        {x:10, y:23, speed: 2},
 
-        {x:15, y:23, speed: 1},
+        {x:15, y:23, speed: 2},
 
-        {x:31, y:23, speed: 1},
-        {x:31, y:18, speed: 1},
-        {x:26, y:23, speed: 1},
-        {x:31, y:13, speed: 1},
-        {x:21, y:23, speed: 1}
+        {x:31, y:23, speed: 2},
+        {x:31, y:18, speed: 2},
+        {x:26, y:23, speed: 2},
+        {x:31, y:13, speed: 2},
+        {x:21, y:23, speed: 2}
     ],
     beaconLocations: [
         {x:27, y:6},
@@ -68,7 +68,12 @@ export default [{
         {x:22, y:15},
         {x:7, y:7}
     ],
-    city: {x:15, y:10}
+    city: {x:15, y:10},
+    intro: [
+        "Turns out most of our colonized planets are inhabited by microbes that developed a shared conscience, and they want us gone! They are moving with the water and will flood and destroy all our structures, we can not stop them.",
+        "Luckily we found a way for the process to power our subspace beacons, once the flood reaches all beacons, we will be able to jump the colony core and evacuate.",
+        "Good thing the beacons are on lower elavations than the core."
+    ]
 },{
     terrain: [
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
@@ -104,9 +109,16 @@ export default [{
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],
         [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     ],
-    sources: [],
+    sources: [
+        {x:16, y:12, speed: 5},
+    ],
     beaconLocations: [
         {x:5, y:12}
     ],
-    city: {x:16, y:12}
+    city: {x:16, y:12},
+    intro: [
+        "Blah",
+        "Blorp",
+        "Snafu"
+    ]
 }];

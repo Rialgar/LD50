@@ -8,6 +8,8 @@
             padding: 0;
             margin: 0;
             background-color: black;
+            width: 100%;
+            height: 100%;
         }
         canvas {
             position: absolute;
@@ -43,8 +45,63 @@
         table.debug td:hover{
             opacity: 1;
         }
+        div#ui {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;            
+        }
+        div#ui.hidden {
+            display: none;
+        }
+        div#ui .pad{
+            flex-basis: 0;
+            flex-grow: 1;
+        }
+        div#ui #modal{
+            width: 45em;
+            padding: 1em;
+            border-radius: 0.5em;
+            margin: auto;
+            background-color: rgba(0,0,0,0.9);
+            color: white;
+            border: 2px solid #c2830e;
+        }
+        div#ui p.lost{
+            font-weight: 900;
+            font-size: 1.5em;
+            text-align: center;
+        }
+        div#ui #buttons{
+            text-align: center;            
+        }
+        div#ui button {
+            border-radius: 0.5em;
+            border: 2px outset #c2830e;
+            background-color: rgb(30,30,30);
+            padding: .3em .6em;
+            color: white;
+            cursor: pointer;
+        }
+        div#ui button:hover {
+            background-color: rgb(50,50,30);
+        }
+        div#ui button:active {
+            border-style: inset;
+            background-color: rgb(20,20,00);
+        }
     </style>
 </head>
-<body>    
+<body>
+    <div id="ui">
+        <div class="pad"></div>
+        <div id="modal">
+            <div id="intro"><p>This is example text</p><p>in mutliple paragraphs</p></div>
+            <div id="buttons"><button id="ok">OK</button></div>
+        </div>
+        <div class="pad"></div>
+    </div>
 </body>
 </html>
