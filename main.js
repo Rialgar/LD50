@@ -1,3 +1,5 @@
+const designMode = false;
+
 const terrainConfig = {
     width: 32,
     height: 24,
@@ -118,6 +120,9 @@ function onLoad(){
     }
 
     function isCity(x, y){
+        if(!city.active){
+            return false;
+        }
         const location = city.getData("pos");
         const dx = location.x-x;
         const dy = location.y-y;
@@ -125,7 +130,7 @@ function onLoad(){
     }
 
     let bagLevel = 0;
-    const maxBagLevel = 5;
+    const maxBagLevel = 5;    
 
     let nextLevel = 0;
     let levelFinished = false;
@@ -142,18 +147,18 @@ function onLoad(){
         for(let x = 0; x < terrainConfig.width; x++){
             for(let y = 0; y < terrainConfig.height; y++){
                 water[x][y] = 0;
-                terrain[x][y] = level.terrain[x][y];
+                terrain[x][y] = level ? level.terrain[x][y] : 5;
             }
         }        
 
         sources.length=0;
-        sources.push(...level.sources);
+        level && sources.push(...level.sources);
 
         beacons.forEach(beacon => {
             beacon.destroy();
         });
         beacons.length = 0;
-        level.beaconLocations.forEach(location => {
+        level && level.beaconLocations.forEach(location => {
             beacons.push(
                 scene.add
                     .image(location.x*terrainConfig.scale, location.y*terrainConfig.scale, "beacon")
@@ -163,12 +168,14 @@ function onLoad(){
             );
         });
 
+        const cityPos = level?level.city:{x:16, y:12};
         city && city.destroy();
         city = scene.add
-            .image((level.city.x+0.5)*terrainConfig.scale, (level.city.y+0.5)*terrainConfig.scale, 'city', 0)
+            .image((cityPos.x+0.5)*terrainConfig.scale, (cityPos.y+0.5)*terrainConfig.scale, 'city', 0)
             .setDepth(terrainConfig.colors.length*3)
-            .setData("pos", level.city)
-            .setData("charge", 0);
+            .setData("pos", cityPos)
+            .setData("charge", 0)
+            .setData("damage", 0);
 
         beaconParticles && beaconParticles.destroy();
         beaconParticles = scene.add.particles('beacon_particles').setDepth(terrainConfig.colors.length*3+1);
@@ -186,7 +193,7 @@ function onLoad(){
             p.textContent = "The microbes got to the colony core. You Lost. Restarting Level.";
             levelIntroElement.appendChild(p);
         }
-        level.intro.forEach( text => {
+        (level ? level.intro : ["You Won! Thanks for playing"]).forEach( text => {
             const p = document.createElement('p');
             p.textContent = text;
             levelIntroElement.appendChild(p);
@@ -196,28 +203,28 @@ function onLoad(){
 
         paused = true;
     }
-
+    
     function create ()
     {
-        game.canvas.oncontextmenu = function (e) { e.preventDefault(); }
+        window.oncontextmenu = function (e) { e.preventDefault(); }
 
         for(let i = 0; i < terrainConfig.colors.length; i++){
             terrainGraphics.push(this.add.graphics().setDepth(3*i));
             waterGraphics.push(this.add.graphics().setDepth(3*i+2));
         }
-
+        
         let lastX=0, lastY = 0;
         this.input.on('pointerdown', function (pointer) {
             const x = Math.floor(pointer.worldX / terrainConfig.scale);
             const y = Math.floor(pointer.worldY / terrainConfig.scale);
             console.log(x, y);
-            if(!isBeacon(x, y) && !isCity(x, y)){
-                if(pointer.button === 0 && bagLevel < maxBagLevel && terrain[x][y] > 0){
+            if(designMode || (!isBeacon(x, y) && !isCity(x, y))){
+                if(pointer.button === 0 && terrain[x][y] > 0 && (designMode || bagLevel < maxBagLevel)){
                     terrain[x][y] = terrain[x][y]-1;
-                    bagLevel += 1;
-                } else if (pointer.button === 2  && bagLevel > 0 && terrain[x][y]+1 < terrainConfig.colors.length){
+                    !designMode && (bagLevel += 1);
+                } else if (pointer.button === 2 && terrain[x][y]+1 < terrainConfig.colors.length && (designMode || bagLevel > 0)){
                     terrain[x][y] = terrain[x][y]+1;
-                    bagLevel -= 1;
+                    !designMode && (bagLevel -= 1);
                 }
                 terrainDirty = true;
                 bagContentElement.style.height = (bagLevel/maxBagLevel)*100 + '%';
@@ -228,7 +235,7 @@ function onLoad(){
         this.input.on('pointermove', function (pointer) {
             const x = Math.floor(pointer.worldX / terrainConfig.scale);
             const y = Math.floor(pointer.worldY / terrainConfig.scale);
-            const validTile = !isBeacon(x, y) && !isCity(x, y);
+            const validTile = designMode || (!isBeacon(x, y) && !isCity(x, y));
             if(validTile){
                 game.canvas.style.cursor = "pointer";
             } else {
@@ -237,12 +244,12 @@ function onLoad(){
             if(pointer.isDown){
                 if(lastX !== x || lastY !== y){
                     if(validTile){
-                        if(pointer.leftButtonDown() && bagLevel < maxBagLevel && terrain[x][y] > 0){
+                        if(pointer.leftButtonDown()  && terrain[x][y] > 0 && (designMode || bagLevel < maxBagLevel)){
                             terrain[x][y] = terrain[x][y]-1;
-                            bagLevel += 1;
-                        } else if (pointer.rightButtonDown() && bagLevel > 0 && terrain[x][y]+1 < terrainConfig.colors.length){
+                            !designMode && (bagLevel += 1);
+                        } else if (pointer.rightButtonDown() && terrain[x][y]+1 < terrainConfig.colors.length && (designMode || bagLevel > 0)){
                             terrain[x][y] = terrain[x][y]+1;
-                            bagLevel -= 1;
+                            !designMode && (bagLevel -= 1);
                         }
                         terrainDirty = true;
                         bagContentElement.style.height = (bagLevel/maxBagLevel)*100 + '%';
@@ -257,6 +264,12 @@ function onLoad(){
 
         window.debug = {
             terrainGraphics, waterGraphics, beacons
+        };
+        window.debug.printTerrain = () => {
+            let out = "[\n";
+            terrain.forEach(t => out += "    " + JSON.stringify(t) + ",\n");
+            out = out + "]";
+            return out;
         }
     }
 
@@ -406,9 +419,11 @@ function onLoad(){
     function update (time, delta)
     {
         if(!paused){
-            sources.forEach(source => {
-                water[source.x][source.y] += source.speed * delta/1000;
-            });
+            if(!designMode){
+                sources.forEach(source => {
+                    water[source.x][source.y] += source.speed * delta/1000;
+                });
+            }
             const changes = [];
             for(let x = 0; x < terrainConfig.width; x++){
                 changes[x] = [];
@@ -447,14 +462,16 @@ function onLoad(){
             if(city.active){
                 const {x,y} = city.getData('pos');
                 const w = water[x][y] + water[x][y-1]  + water[x][y+1] + water[x-1][y] + water[x-1][y-1]  + water[x-1][y+1] + water[x+1][y] + water[x+1][y-1]  + water[x+1][y+1];
-                if(w > 2){
-
+                let damage = city.getData('damage');
+                damage += w/9*delta/1000;
+                city.setData('damage', damage);
+                if(damage > 5){
                     loadLevel(this, true);
                     return;
                 }
             }
 
-            let allBeaconsCharged = true;
+            let allBeaconsCharged = beacons.length > 0;
             beacons.forEach(beacon => {
                 let charge = beacon.getData('charge');
                 if(charge < 1000){
