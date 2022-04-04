@@ -4,7 +4,7 @@ This is my entry for Ludum Dare 50. The theme was "Delay the inevitable".
 
 [![Screenshot of the game. Squares in various shades of green and brown represent terrain in a top-down view. Blue water is coering about half of them. 4 identical gold and yellow "beacons" and one bigger "colony core" are spread on the uncovered land.](./screenshots/main.png)](https://rialgar.github.io/LD50/)
 
-[TODO Rate here](https://ldjam.com/events/ludum-dare/)
+[Rate here](https://ldjam.com/events/ludum-dare/50/delay-the-flood)
 
 You can not stop the flood, but you can change the terrain to delay it from reaching the colony core until the subspace beacons activate.
 
@@ -19,7 +19,7 @@ Sorry to any colorblind players, I did not manage an alternative color scheme or
 - You can carry up to 5 clicks worth of soil at a time.
 
 ## Library/Engine
-- [Phaser.js](https://phaser.io/)
+- [Phaser](https://phaser.io/)
 
 ## Tools
 - [Visual Studio Code by Microsoft](https://code.visualstudio.com/)
